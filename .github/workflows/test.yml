@@ -1,0 +1,193 @@
+name: build
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v6
+        with:
+          cache: 'yarn'
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      - name: Run build and test
+        run: |
+          yarn all
+
+      - name: Upload build assets
+        uses: actions/upload-artifact@v5
+        with:
+          name: build-assets
+          path: dist
+
+  test:
+    needs: build
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ ubuntu-latest, windows-latest, macos-latest ]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Download build assets
+        uses: actions/download-artifact@v6
+        with:
+          name: build-assets
+
+      - name: Run glob for all files
+        id: glob-all-files
+        uses: ./
+        with:
+          files: "**"
+          include-deleted-files: "true"
+          base-sha: "99561ef"
+          sha: "2eb2427"
+
+      - name: Show output
+        run: |
+          echo "${{ steps.glob-all-files.outputs.paths }}"
+          cat "${{ steps.glob-all-files.outputs.paths-output-file }}"
+
+      - name: Run glob for yml files
+        id: glob-yml-files
+        uses: ./
+        with:
+          files: |
+            **.yml
+            !.github/**/rebase.yml
+
+      - name: Show output
+        run: |
+          echo "${{ steps.glob-yml-files.outputs.paths }}"
+          cat "${{ steps.glob-yml-files.outputs.paths-output-file }}"
+
+      - name: Run glob for all yml files
+        id: glob-all-yml-files
+        uses: ./
+        with:
+          files: |
+            **/*.yml
+          excluded-files: |
+            .github/workflow/rebase.yml
+
+      - name: Show output
+        run: |
+          echo "${{ steps.glob-all-yml-files.outputs.paths }}"
+          cat "${{ steps.glob-all-yml-files.outputs.paths-output-file }}"
+
+      - name: Run glob for test.yml and md files
+        uses: ./
+        id: glob-test-yml-md
+        with:
+          files: |
+            .github/workflows/test.yml
+            *.md
+
+      - name: Show output
+        run: |
+          echo "${{ steps.glob-test-yml-md.outputs.paths }}"
+          cat "${{ steps.glob-test-yml-md.outputs.paths-output-file }}"
+          
+      - name: Run glob for source-files.txt escape paths
+        uses: ./
+        id: glob-source-files-safe-output
+        with:
+          files-from-source-file: |
+            src/__tests__/source-files.txt
+            src/__tests__/source-files.txt
+          safe-output: true
+
+      - name: Show output
+        run: |
+          echo "${{ steps.glob-source-files-safe-output.outputs.paths }}"
+          cat "${{ steps.glob-source-files-safe-output.outputs.paths-output-file }}"
+
+      - name: Run glob for source-files.txt
+        uses: ./
+        id: glob-source-files
+        with:
+          files-from-source-file: |
+            src/__tests__/source-files.txt
+            src/__tests__/source-files.txt
+
+      - name: Show output
+        run: |
+          echo "${{ steps.glob-source-files.outputs.paths }}"
+          cat "${{ steps.glob-source-files.outputs.paths-output-file }}"
+
+      - name: Run glob excluding files in source-files.txt
+        uses: ./
+        id: glob-excluded-source-files
+        with:
+          excluded-files-from-source-file: |
+            src/__tests__/source-files.txt
+            src/__tests__/source-files.txt
+
+      - name: Show output
+        run: |
+          echo "${{ steps.glob-excluded-source-files.outputs.paths }}"
+          cat "${{ steps.glob-excluded-source-files.outputs.paths-output-file }}"
+
+      - name: Run glob for test.yml and md files and custom separator
+        uses: ./
+        id: glob-test-yml-md-separator
+        with:
+          files: ".github/workflows/test.yml *.md"
+          files-separator: " "
+
+      - name: Show output
+        run: |
+          echo "${{ steps.glob-test-yml-md-separator.outputs.paths }}"
+          cat "${{ steps.glob-test-yml-md-separator.outputs.paths-output-file }}"
+
+      - name: Run glob for all .yml files and excluding test.yml and custom separator
+        uses: ./
+        id: glob-excluded-test-yml-separator
+        with:
+          files: "**.yml **/*.yml"
+          files-separator: " "
+          excluded-files: ".github/workflows/test.yml"
+
+      - name: Show output
+        run: |
+          echo "${{ steps.glob-excluded-test-yml-separator.outputs.paths }}"
+          cat "${{ steps.glob-excluded-test-yml-separator.outputs.paths-output-file }}"
+      
+      - name: Run glob with invalid patterns
+        uses: ./
+        id: glob-invalid
+        continue-on-error: true
+        with:
+          files: |
+            - *.md
+
+      - name: Show output
+        run: |
+          echo "${{ steps.glob-invalid.outputs.paths }}"
+          echo "${{ steps.glob-invalid.outputs.paths-output-file }}"
+
+      - name: Verify that the paths-output-file is created
+        if: steps.glob-invalid.outputs.paths-output-file == ''
+        run: |
+          echo "Expected: paths-output-file to not be empty got ${{ steps.glob-invalid.outputs.paths-output-file }}"
+          exit 1
