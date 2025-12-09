@@ -65,8 +65,8 @@ jobs:
         with:
           files: "**"
           include-deleted-files: "true"
-          base-sha: "99561ef"
-          sha: "2eb2427"
+          base-sha: "04432df"
+          sha: "cb9516d"
 
       - name: Show output
         run: |
@@ -93,7 +93,7 @@ jobs:
           files: |
             **/*.yml
           excluded-files: |
-            .github/workflow/rebase.yml
+            .github/workflows/rebase.yml
 
       - name: Show output
         run: |
