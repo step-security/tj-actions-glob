@@ -1,7 +1,5 @@
 import * as core from '@actions/core'
 import {run} from '../main'
-import * as fs from 'fs'
-import * as path from 'path'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {normalizeSeparators, tempfile} from '../utils'
@@ -28,20 +26,6 @@ const defaultEnv = {
 function mockedEnv(testEnvVars: Record<string, string>): void {
   jest.replaceProperty(process, 'env', {...process.env, ...testEnvVars})
 }
-
-beforeAll(() => {
-  // Ensure coverage directory and clover.xml exist for tests that need it
-  const coverageDir = path.join(process.cwd(), 'coverage')
-  const cloverPath = path.join(coverageDir, 'clover.xml')
-
-  if (!fs.existsSync(coverageDir)) {
-    fs.mkdirSync(coverageDir, {recursive: true})
-  }
-
-  if (!fs.existsSync(cloverPath)) {
-    fs.writeFileSync(cloverPath, '')
-  }
-})
 
 afterEach(() => {
   jest.restoreAllMocks()
