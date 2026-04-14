@@ -43,7 +43,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const glob = __importStar(__nccwpck_require__(7206));
-const fs = __importStar(__nccwpck_require__(9896));
 const fs_1 = __nccwpck_require__(9896);
 const path = __importStar(__nccwpck_require__(6928));
 const axios_1 = __importStar(__nccwpck_require__(7269));
@@ -57,9 +56,9 @@ async function validateSubscription() {
     // eslint-disable-next-line @typescript-eslint/prefer-destructuring
     const eventPath = process.env.GITHUB_EVENT_PATH;
     let repoPrivate;
-    if (eventPath && fs.existsSync(eventPath)) {
+    if (eventPath && (0, fs_1.existsSync)(eventPath)) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-        const eventData = JSON.parse(fs.readFileSync(eventPath, 'utf8'));
+        const eventData = JSON.parse((0, fs_1.readFileSync)(eventPath, 'utf8'));
         repoPrivate = eventData?.repository?.private;
     }
     const upstream = 'tj-actions/glob';

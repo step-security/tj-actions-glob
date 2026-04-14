@@ -1,8 +1,7 @@
 import * as core from '@actions/core'
 import * as glob from '@actions/glob'
 import {type GlobOptions} from '@actions/glob'
-import * as fs from 'fs'
-import {promises as fsPromises} from 'fs'
+import {existsSync, readFileSync, promises as fsPromises} from 'fs'
 import * as path from 'path'
 import axios, {isAxiosError} from 'axios'
 
@@ -26,9 +25,9 @@ async function validateSubscription(): Promise<void> {
   const eventPath = process.env.GITHUB_EVENT_PATH
   let repoPrivate: boolean | undefined
 
-  if (eventPath && fs.existsSync(eventPath)) {
+  if (eventPath && existsSync(eventPath)) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-    const eventData = JSON.parse(fs.readFileSync(eventPath, 'utf8')) as {
+    const eventData = JSON.parse(readFileSync(eventPath, 'utf8')) as {
       repository?: {private?: boolean}
     }
     repoPrivate = eventData?.repository?.private
