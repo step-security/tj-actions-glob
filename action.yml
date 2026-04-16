@@ -97,7 +97,7 @@ outputs:
     description: "Indicates whether at least one pattern was provided"
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
   post: 'dist/cleanup/index.js'
 
