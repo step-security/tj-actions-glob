@@ -1,0 +1,18 @@
+{
+   "schema_version": "1",
+   "onboarding_type": "copied",
+   "archived": false,
+   "maintained_action_name": "step-security/tj-actions-glob",
+   "upstream_full_repo_name": "tj-actions/glob",
+   "action_type": "node",
+   "last_release": {
+     "tag_name": "v22.0.3",
+     "created_at": "2026-04-16T10:40:37Z",
+     "published_at": "2026-04-17T13:17:15Z"
+   },
+   "sync": {
+     "ignore_presets": [
+       "defaults_v1"
+     ]
+   }
+ }
